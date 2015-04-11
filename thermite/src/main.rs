@@ -37,9 +37,9 @@ impl VM {
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i-j,
-				_ => panic!("can only add ints"),
+				_ => panic!("can only subtract ints"),
 			},
-			_ => panic!("can only add ints"),
+			_ => panic!("can only subtract ints"),
 		};
 		self.push(Operator::Value(z));
 	}
@@ -50,9 +50,9 @@ impl VM {
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i*j,
-				_ => panic!("can only add ints"),
+				_ => panic!("can only multiply ints"),
 			},
-			_ => panic!("can only add ints"),
+			_ => panic!("can only multiply ints"),
 		};
 		self.push(Operator::Value(z));
 	}
@@ -63,9 +63,140 @@ impl VM {
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i/j,
-				_ => panic!("can only add ints"),
+				_ => panic!("can only divide ints"),
 			},
-			_ => panic!("can only add ints"),
+			_ => panic!("can only divide ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn modulus <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i % j,
+				_ => panic!("can only mod ints"),
+			},
+			_ => panic!("can only mod ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn and <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i & j,
+				_ => panic!("can only and ints"),
+			},
+			_ => panic!("can only and ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn or <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i | j,
+				_ => panic!("can only or ints"),
+			},
+			_ => panic!("can only or ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn xor <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i ^ j,
+				_ => panic!("can only xor ints"),
+			},
+			_ => panic!("can only xor ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn lshift <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i << j,
+				_ => panic!("can only lshift ints"),
+			},
+			_ => panic!("can only lshift ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn rshift <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i >> j,
+				_ => panic!("can only rshift ints"),
+			},
+			_ => panic!("can only rshift ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn abs <'a> (&'a mut self) {
+		let x = self.pop();
+		let z = match x{
+			Operator::Value(i) => if i < 0{-i} else {i},
+			_ => panic!("can only abs an int"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn max <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => if j > i {j} else{i},
+				_ => panic!("can only max ints"),
+			},
+			_ => panic!("can only max ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn min <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => if j < i {j} else {i},
+				_ => panic!("can only min ints"),
+			},
+			_ => panic!("can only min ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn invert <'a> (&'a mut self) {
+		let x = self.pop();
+		let z = match x{
+			Operator::Value(i) => !i,
+			_ => panic!("can only invert an int"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	pub fn negate <'a> (&'a mut self) {
+		let x = self.pop();
+		let z = match x{
+			Operator::Value(i) => -i,
+			_ => panic!("can only negate an int"),
 		};
 		self.push(Operator::Value(z));
 	}
@@ -87,7 +218,7 @@ pub enum Operator {
 	Subtract,
 	Multiply,
 	Divide,
-	Mod,
+	Modulus,
 	And,
 	Or,
 	Xor,
@@ -124,7 +255,7 @@ fn parse(s: &str) -> Operator {
 		"-" => Operator::Subtract,
 		"*" => Operator::Multiply,
 		"/" => Operator::Divide,
-		"mod" => Operator::Mod,
+		"mod" => Operator::Modulus,
 		"and" => Operator::And,
 		"or" => Operator::Or,
 		"xor" => Operator::Xor,
