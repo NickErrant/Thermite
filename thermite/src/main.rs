@@ -1,24 +1,24 @@
 use std::io;
 use std::str::FromStr;
 
-struct VM {
+pub struct VM {
 	stack: Vec<Operator>,
 }
 
 impl VM {
-	fn pop <'a> (&'a mut self) -> Operator {
+	pub fn pop <'a> (&'a mut self) -> Operator {
 		return self.stack.pop().expect("gg reinstall");
 	}
 
-	fn push <'a> (&'a mut self, op: Operator) {
+	pub fn push <'a> (&'a mut self, op: Operator) {
 		self.stack.push(op);
 	}
 
-	fn eval <'a> (&'a mut self, op: Operator) {
+	pub fn eval <'a> (&'a mut self, op: Operator) {
 		
 	}
 
-	fn add <'a> (&'a mut self) {
+	pub fn add <'a> (&'a mut self) {
 		let x = self.pop();
 		let y = self.pop();
 		let z = match x{
@@ -31,7 +31,7 @@ impl VM {
 		self.push(Operator::Value(z));
 	}
 
-	fn subtract <'a> (&'a mut self) {
+	pub fn subtract <'a> (&'a mut self) {
 		let x = self.pop();
 		let y = self.pop();
 		let z = match x{
@@ -44,7 +44,7 @@ impl VM {
 		self.push(Operator::Value(z));
 	}
 
-	fn multiply <'a> (&'a mut self) {
+	pub fn multiply <'a> (&'a mut self) {
 		let x = self.pop();
 		let y = self.pop();
 		let z = match x{
@@ -57,7 +57,7 @@ impl VM {
 		self.push(Operator::Value(z));
 	}
 
-	fn divide <'a> (&'a mut self) {
+	pub fn divide <'a> (&'a mut self) {
 		let x = self.pop();
 		let y = self.pop();
 		let z = match x{
@@ -71,7 +71,7 @@ impl VM {
 	}
 }
 
-enum Operator {
+pub enum Operator {
 	//stack
 	Dup,
 	Drop,
