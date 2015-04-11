@@ -32,6 +32,51 @@ impl VM {
 		};
 		self.push(Operator::Value(z));
 	}
+
+	fn subtract <'a> (&'a mut self) {
+		let mut x = Operator::Other;
+		let mut y = Operator::Other;
+		self.pop(&mut x);
+		self.pop(&mut y);
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i-j,
+				_ => panic!("can only add ints"),
+			},
+			_ => panic!("can only add ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	fn multiply <'a> (&'a mut self) {
+		let mut x = Operator::Other;
+		let mut y = Operator::Other;
+		self.pop(&mut x);
+		self.pop(&mut y);
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i*j,
+				_ => panic!("can only add ints"),
+			},
+			_ => panic!("can only add ints"),
+		};
+		self.push(Operator::Value(z));
+	}
+
+	fn divide <'a> (&'a mut self) {
+		let mut x = Operator::Other;
+		let mut y = Operator::Other;
+		self.pop(&mut x);
+		self.pop(&mut y);
+		let z = match x{
+			Operator::Value(i) => match y{
+				Operator::Value(j) => i/j,
+				_ => panic!("can only add ints"),
+			},
+			_ => panic!("can only add ints"),
+		};
+		self.push(Operator::Value(z));
+	}
 }
 
 enum Operator {
