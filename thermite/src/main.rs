@@ -15,7 +15,24 @@ impl VM {
 	}
 
 	pub fn eval <'a> (&'a mut self, op: Operator) {
-		
+		match op {
+			Operator::Add => self.add(),
+			Operator::Subtract => self.subtract(),
+			Operator::Multiply => self.multiply(),
+			Operator::Divide => self.divide(),
+			Operator::Modulus => self.modulus(),
+			Operator::And => self.and(),
+			Operator::Or => self.or(),
+			Operator::Xor => self.xor(),
+			Operator::Lshift => self.lshift(),
+			Operator::Rshift => self.rshift(),
+			Operator::Abs => self.abs(),
+			Operator::Max => self.max(),
+			Operator::Min => self.min(),
+			Operator::Invert => self.invert(),
+			Operator::Negate => self.negate(),
+			_ => panic!("soon")
+		}
 	}
 
 	// Math Functions
@@ -258,10 +275,10 @@ pub enum Operator {
 	Swap,
 	Over,
 	Rot,
-	
+
 	//debug
 	Print,
-	
+
 	//math
 	Add,
 	Subtract,
@@ -278,7 +295,7 @@ pub enum Operator {
 	Min,
 	Invert,
 	Negate,
-	
+
 	//custom
 	Define,
 
@@ -298,7 +315,7 @@ fn parse(s: &str) -> Operator {
 
 		//debug operations:
 		"." => Operator::Print,
-		
+
 		//math operations:
 		"+" => Operator::Add,
 		"-" => Operator::Subtract,
@@ -317,10 +334,10 @@ fn parse(s: &str) -> Operator {
 		"min" => Operator::Min,
 		"invert" => Operator::Invert,
 		"negate" => Operator::Negate,
-		
+
 		//custom definitions
 		":" => Operator::Define,
-		
+
 		//value or custom operator
 		x => {
 			let y: Option<i32> = FromStr::from_str(x).ok();
