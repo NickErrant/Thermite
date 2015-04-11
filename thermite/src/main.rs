@@ -6,8 +6,8 @@ struct VM {
 }
 
 impl VM {
-	fn pop <'a> (&'a mut self, ret: &mut Operator) {
-		*ret = self.stack.pop().expect("gg reinstall");
+	fn pop <'a> (&'a mut self) -> Operator {
+		return self.stack.pop().expect("gg reinstall");
 	}
 
 	fn push <'a> (&'a mut self, op: Operator) {
@@ -19,10 +19,8 @@ impl VM {
 	}
 
 	fn add <'a> (&'a mut self) {
-		let mut x = Operator::Other;
-		let mut y = Operator::Other;
-		self.pop(&mut x);
-		self.pop(&mut y);
+		let x = self.pop();
+		let y = self.pop();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i+j,
@@ -34,10 +32,8 @@ impl VM {
 	}
 
 	fn subtract <'a> (&'a mut self) {
-		let mut x = Operator::Other;
-		let mut y = Operator::Other;
-		self.pop(&mut x);
-		self.pop(&mut y);
+		let x = self.pop();
+		let y = self.pop();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i-j,
@@ -49,10 +45,8 @@ impl VM {
 	}
 
 	fn multiply <'a> (&'a mut self) {
-		let mut x = Operator::Other;
-		let mut y = Operator::Other;
-		self.pop(&mut x);
-		self.pop(&mut y);
+		let x = self.pop();
+		let y = self.pop();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i*j,
@@ -64,10 +58,8 @@ impl VM {
 	}
 
 	fn divide <'a> (&'a mut self) {
-		let mut x = Operator::Other;
-		let mut y = Operator::Other;
-		self.pop(&mut x);
-		self.pop(&mut y);
+		let x = self.pop();
+		let y = self.pop();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i/j,
