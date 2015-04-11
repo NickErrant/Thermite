@@ -6,12 +6,11 @@ struct VM {
 }
 
 impl VM {
-	fn pop(&self, ret: &mut Operator) {
-		let mut transfer = move |op: Operator| op;
-		ret = transfer(self.stack.pop().expect("gg reinstall"));
+	fn pop <'a> (&'a mut self, ret: &mut Operator) {
+		*ret = self.stack.pop().expect("gg reinstall");
 	}
 
-	fn push(&self, op: Operator) {
+	fn push <'a> (&'a mut self, op: Operator) {
 		self.stack.push(op);
 	}
 }
@@ -112,7 +111,7 @@ fn process(s: String) {
 fn main() {
 	
 	let mut x = io::stdin();
-	let vm = VM {stack: vec![Operator::Print]};
+	let mut vm = VM {stack: vec![Operator::Print]};
 
 	loop{
 		let mut y: String = "".to_string();
