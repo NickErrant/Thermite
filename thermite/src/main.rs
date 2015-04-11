@@ -13,6 +13,10 @@ impl VM {
 	fn push <'a> (&'a mut self, op: Operator) {
 		self.stack.push(op);
 	}
+
+	fn eval <'a> (&'a mut self, op: Operator) {
+		
+	}
 }
 
 enum Operator {
@@ -96,27 +100,18 @@ fn parse(s: &str) -> Operator {
 	}
 }
 
-fn process(s: String) {
-	for o in s.split(" "){
-		let b = parse(o.trim());
-		println!("{}",match b {
-			Operator::Add => "addition!",
-			Operator::Subtract => "subtraction!",
-			Operator::Value(_) => "value!",
-			_ => "other!",
-		});
-	}
-}
-
 fn main() {
-	
 	let mut x = io::stdin();
 	let mut vm = VM {stack: vec![Operator::Print]};
 
 	loop{
-		let mut y: String = "".to_string();
-		let _ = x.read_line(&mut y);
+		let mut line: String = "".to_string();
+		let _ = x.read_line(&mut line);
 
-	    process(y);
+		for o in line.split(" "){
+			println!("evaling: {}", o.trim());
+			let b = parse(o.trim());
+			vm.eval(b);
+		}
 	}
 }
