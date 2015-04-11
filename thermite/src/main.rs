@@ -1,18 +1,20 @@
 use std::io::stdin;
-use std::convert::AsRef;
 
 fn main() {
 	
 	let mut x = stdin();
 
 	loop{
-		let y: &mut String = &mut "".to_string();
-		let _ = x.read_line(y);
+		let mut y: String = "".to_string();
+		let _ = x.read_line(&mut y);
 
-	    println!("Hello, world! {}", match y.as_ref(){
-	    	"+" => "addition!",
-	    	"-" => "subtraction!",
-	    	_ => "other!",
+		let z = y.chars().next();
+	    println!("Hello, world! {}", match z{
+	    	Some(b) => match b{
+	    		'+' => "addition!",
+	    		_ => "other!",
+	    	},
+	    	None => "none!",
 	    });
 	}
 }
