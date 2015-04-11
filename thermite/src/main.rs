@@ -18,6 +18,7 @@ impl VM {
 		
 	}
 
+	// Math Functions
 	pub fn add <'a> (&'a mut self) {
 		let x = self.pop();
 		let y = self.pop();
@@ -200,8 +201,56 @@ impl VM {
 		};
 		self.push(Operator::Value(z));
 	}
+
+	//Stack Functions
+	pub fn dup <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = x.clone();
+		self.push(x);
+		self.push(y);
+	}
+
+	pub fn drop <'a> (&'a mut self) {
+		self.pop();
+	}
+
+	pub fn swap <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		self.push(x);
+		self.push(y);
+	}
+
+	pub fn over <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = x.clone();
+		self.push(x);
+		self.push(y);
+		self.push(z);
+	}
+
+	pub fn rot <'a> (&'a mut self) {
+		let x = self.pop();
+		let y = self.pop();
+		let z = self.pop();
+		self.push(x);
+		self.push(z);
+		self.push(y);
+	}
+
+	//Debug Functions
+	pub fn print <'a> (&'a mut self) {
+		let x = self.pop();
+		println!("{}",match x{
+			Operator::Value(i) => i,
+			_ => panic!("tried to print something other than a value"),
+		});
+	}
+	
 }
 
+#[derive(Clone)]
 pub enum Operator {
 	//stack
 	Dup,
@@ -296,5 +345,7 @@ fn main() {
 			let b = parse(o.trim());
 			vm.eval(b);
 		}
+
+		if vm.stack.len() == 0{break;}
 	}
 }
