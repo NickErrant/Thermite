@@ -31,6 +31,8 @@ impl VM {
 			Operator::Min => self.min(),
 			Operator::Invert => self.invert(),
 			Operator::Negate => self.negate(),
+			Operator::Value(i) => self.push(Operator::Value(i)),
+			Operator::Print => self.print(),
 			_ => panic!("soon")
 		}
 	}
