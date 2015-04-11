@@ -1,20 +1,100 @@
 use std::io;
+use std::str::FromStr;
+
+struct VM {
+	stack: Vec<Operator>,
+}
+
+impl VM {
+	fn pop(&self, ret: &mut Operator) {
+		let mut transfer = move |op: Operator| op;
+		ret = transfer(self.stack.pop().expect("gg reinstall"));
+	}
+
+	fn push(&self, op: Operator) {
+		self.stack.push(op);
+	}
+}
 
 enum Operator {
+	//stack
+	Dup,
+	Drop,
+	Swap,
+	Over,
+	Rot,
+	
+	//debug
+	Print,
+	
+	//math
 	Add,
 	Subtract,
-	Push,
-	Pop,
-	None,
+	Multiply,
+	Divide,
+	Mod,
+	And,
+	Or,
+	Xor,
+	Lshift,
+	Rshift,
+	Abs,
+	Max,
+	Min,
+	Invert,
+	Negate,
+	
+	//custom
+	Define,
+
+	//values and custom calls
+	Value(i32),
+	Other,
 }
 
 fn parse(s: &str) -> Operator {
 	match s {
+		//stack operations:
+		"dup" => Operator::Dup,
+		"drop" => Operator::Drop,
+		"swap" => Operator::Swap,
+		"over" => Operator::Over,
+		"rot" => Operator::Rot,
+
+		//debug operations:
+		"." => Operator::Print,
+		
+		//math operations:
 		"+" => Operator::Add,
 		"-" => Operator::Subtract,
-		"pop" => Operator::Pop,
-		_ => Operator::None,
-	}	
+		"*" => Operator::Multiply,
+		"/" => Operator::Divide,
+		"mod" => Operator::Mod,
+		"and" => Operator::And,
+		"or" => Operator::Or,
+		"xor" => Operator::Xor,
+		"lshift" => Operator::Lshift,
+		"<<" => Operator::Lshift,
+		"rshift" => Operator::Rshift,
+		">>" => Operator::Rshift,
+		"abs" => Operator::Abs,
+		"max" => Operator::Max,
+		"min" => Operator::Min,
+		"invert" => Operator::Invert,
+		"negate" => Operator::Negate,
+		
+		//custom definitions
+		":" => Operator::Define,
+		
+		//value or custom operator
+		x => {
+			let y: Option<i32> = FromStr::from_str(x).ok();
+			match y{
+				Some(i) => Operator::Value(i),
+				None => Operator::Other,
+			}
+		},
+	}
 }
 
 fn process(s: String) {
@@ -23,7 +103,7 @@ fn process(s: String) {
 		println!("{}",match b {
 			Operator::Add => "addition!",
 			Operator::Subtract => "subtraction!",
-			Operator::Pop => "popped!",
+			Operator::Value(_) => "value!",
 			_ => "other!",
 		});
 	}
@@ -32,6 +112,7 @@ fn process(s: String) {
 fn main() {
 	
 	let mut x = io::stdin();
+	let vm = VM {stack: vec![Operator::Print]};
 
 	loop{
 		let mut y: String = "".to_string();
