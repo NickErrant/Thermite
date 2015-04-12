@@ -5,7 +5,7 @@ use std::collections::HashMap;
 pub struct VM {
 	op_stack: Vec<Operator>,
 	data_stack: Vec<Operator>,
-	defs: HashMap<String, Vec<Operator>>,
+	words: HashMap<String, Vec<Operator>>,
 }
 
 impl VM {
@@ -403,7 +403,7 @@ fn main() {
 	let mut x = io::stdin();
 	let mut vm = VM {op_stack: vec![],
 					 data_stack: vec![],
-					 defs: HashMap::new()};
+					 words: HashMap::new()};
 
 	loop{
 		let mut line: String = "".to_string();
