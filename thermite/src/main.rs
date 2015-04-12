@@ -1,20 +1,32 @@
 use std::io;
 use std::str::FromStr;
+use std::collections::HashMap;
 
 pub struct VM {
-	stack: Vec<Operator>,
+	op_stack: Vec<Operator>,
+	data_stack: Vec<Operator>,
+	defs: HashMap<String, Vec<Operator>>,
 }
 
 impl VM {
-	pub fn pop <'a> (&'a mut self) -> Operator {
-		return self.stack.pop().expect("gg reinstall");
+	pub fn pop_data <'a> (&'a mut self) -> Operator {
+		return self.data_stack.pop().expect("data stack is empty!");
 	}
 
-	pub fn push <'a> (&'a mut self, op: Operator) {
-		self.stack.push(op);
+	pub fn push_data <'a> (&'a mut self, op: Operator) {
+		self.data_stack.push(op);
 	}
 
-	pub fn eval <'a> (&'a mut self, op: Operator) {
+	pub fn pop_op <'a> (&'a mut self) -> Operator {
+		return self.op_stack.pop().expect("operand stack is empty!");
+	}
+
+	pub fn push_op <'a> (&'a mut self, op: Operator) {
+		self.op_stack.push(op);
+	}
+
+	pub fn eval <'a> (&'a mut self) {
+		let op = self.pop_op();
 		match op {
 			Operator::Add => self.add(),
 			Operator::Subtract => self.subtract(),
@@ -36,7 +48,7 @@ impl VM {
 			Operator::Swap => self.swap(),
 			Operator::Over => self.over(),
 			Operator::Rot => self.rot(),
-			Operator::Value(i) => self.push(Operator::Value(i)),
+			Operator::Value(i) => self.push_data(Operator::Value(i)),
 			Operator::Print => self.print(),
 			_ => panic!("soon")
 		}
@@ -44,8 +56,8 @@ impl VM {
 
 	// Math Functions
 	pub fn add <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i+j,
@@ -53,12 +65,12 @@ impl VM {
 			},
 			_ => panic!("can only add ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn subtract <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i-j,
@@ -66,12 +78,12 @@ impl VM {
 			},
 			_ => panic!("can only subtract ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn multiply <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i*j,
@@ -79,12 +91,12 @@ impl VM {
 			},
 			_ => panic!("can only multiply ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn divide <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i/j,
@@ -92,12 +104,12 @@ impl VM {
 			},
 			_ => panic!("can only divide ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn modulus <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i % j,
@@ -105,12 +117,12 @@ impl VM {
 			},
 			_ => panic!("can only mod ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn and <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i & j,
@@ -118,12 +130,12 @@ impl VM {
 			},
 			_ => panic!("can only and ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn or <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i | j,
@@ -131,12 +143,12 @@ impl VM {
 			},
 			_ => panic!("can only or ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn xor <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i ^ j,
@@ -144,12 +156,12 @@ impl VM {
 			},
 			_ => panic!("can only xor ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn lshift <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i << j,
@@ -157,12 +169,12 @@ impl VM {
 			},
 			_ => panic!("can only lshift ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn rshift <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => i >> j,
@@ -170,21 +182,21 @@ impl VM {
 			},
 			_ => panic!("can only rshift ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn abs <'a> (&'a mut self) {
-		let x = self.pop();
+		let x = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => if i < 0{-i} else {i},
 			_ => panic!("can only abs an int"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn max <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => if j > i {j} else{i},
@@ -192,12 +204,12 @@ impl VM {
 			},
 			_ => panic!("can only max ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn min <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
 				Operator::Value(j) => if j < i {j} else {i},
@@ -205,67 +217,67 @@ impl VM {
 			},
 			_ => panic!("can only min ints"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn invert <'a> (&'a mut self) {
-		let x = self.pop();
+		let x = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => !i,
 			_ => panic!("can only invert an int"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	pub fn negate <'a> (&'a mut self) {
-		let x = self.pop();
+		let x = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => -i,
 			_ => panic!("can only negate an int"),
 		};
-		self.push(Operator::Value(z));
+		self.push_data(Operator::Value(z));
 	}
 
 	//Stack Functions
 	pub fn dup <'a> (&'a mut self) {
-		let x = self.pop();
+		let x = self.pop_data();
 		let y = x.clone();
-		self.push(x);
-		self.push(y);
+		self.push_data(x);
+		self.push_data(y);
 	}
 
 	pub fn drop <'a> (&'a mut self) {
-		self.pop();
+		self.pop_data();
 	}
 
 	pub fn swap <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
-		self.push(x);
-		self.push(y);
+		let x = self.pop_data();
+		let y = self.pop_data();
+		self.push_data(x);
+		self.push_data(y);
 	}
 
 	pub fn over <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
+		let x = self.pop_data();
+		let y = self.pop_data();
 		let z = x.clone();
-		self.push(x);
-		self.push(y);
-		self.push(z);
+		self.push_data(x);
+		self.push_data(y);
+		self.push_data(z);
 	}
 
 	pub fn rot <'a> (&'a mut self) {
-		let x = self.pop();
-		let y = self.pop();
-		let z = self.pop();
-		self.push(x);
-		self.push(z);
-		self.push(y);
+		let x = self.pop_data();
+		let y = self.pop_data();
+		let z = self.pop_data();
+		self.push_data(x);
+		self.push_data(z);
+		self.push_data(y);
 	}
 
 	//Debug Functions
 	pub fn print <'a> (&'a mut self) {
-		let x = self.pop();
+		let x = self.pop_data();
 		println!("{}",match x{
 			Operator::Value(i) => i,
 			_ => panic!("tried to print something other than a value"),
@@ -309,6 +321,37 @@ pub enum Operator {
 	//values and custom calls
 	Value(i32),
 	Other,
+}
+
+impl Operator {
+	fn stringify(&self) -> String {
+		match *self{
+			Operator::Add => format!("+"),
+			Operator::Subtract => format!("-"),
+			Operator::Multiply => format!("*"),
+			Operator::Divide => format!("/"),
+			Operator::Modulus => format!("mod"),
+			Operator::And => format!("and"),
+			Operator::Or => format!("or"),
+			Operator::Xor => format!("xor"),
+			Operator::Lshift => format!("<<"),
+			Operator::Rshift => format!(">>"),
+			Operator::Abs => format!("abs"),
+			Operator::Max => format!("max"),
+			Operator::Min => format!("min"),
+			Operator::Invert => format!("invert"),
+			Operator::Negate => format!("negate"),
+			Operator::Dup => format!("dup"),
+			Operator::Drop => format!("drop"),
+			Operator::Swap => format!("swap"),
+			Operator::Over => format!("over"),
+			Operator::Rot => format!("rot"),
+			Operator::Value(i) => format!("{}", i),
+			Operator::Print => format!("."),
+			Operator::Define => format!(":"),
+			Operator::Other => format!("other"),
+		}
+	}
 }
 
 fn parse(s: &str) -> Operator {
@@ -358,18 +401,23 @@ fn parse(s: &str) -> Operator {
 
 fn main() {
 	let mut x = io::stdin();
-	let mut vm = VM {stack: vec![Operator::Print]};
+	let mut vm = VM {op_stack: vec![],
+					 data_stack: vec![],
+					 defs: HashMap::new()};
 
 	loop{
 		let mut line: String = "".to_string();
 		let _ = x.read_line(&mut line);
 
+		if line.trim() == "quit" {break;}
+
 		for o in line.split(" "){
-			println!("evaling: {}", o.trim());
 			let b = parse(o.trim());
-			vm.eval(b);
+			vm.push_op(b);
 		}
 
-		if vm.stack.len() == 0{break;}
+		while vm.op_stack.len() > 0 {
+			vm.eval();
+		}
 	}
 }
