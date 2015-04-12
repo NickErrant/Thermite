@@ -411,7 +411,7 @@ fn main() {
 
 		if line.trim() == "quit" {break;}
 
-		for o in line.split(" "){
+		for o in line.rsplit(" "){
 			let b = parse(o.trim());
 			vm.push_op(b);
 		}
