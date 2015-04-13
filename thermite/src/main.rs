@@ -50,7 +50,7 @@ impl VM {
 			Operator::Rot => self.rot(),
 			Operator::Value(i) => self.push_data(Operator::Value(i)),
 			Operator::Print => self.print(),
-			_ => panic!("soon")
+			x => panic!("soon {}", x.stringify())
 		}
 	}
 
@@ -99,7 +99,7 @@ impl VM {
 		let y = self.pop_data();
 		let z = match x{
 			Operator::Value(i) => match y{
-				Operator::Value(j) => i/j,
+				Operator::Value(j) => j/i,
 				_ => panic!("can only divide ints"),
 			},
 			_ => panic!("can only divide ints"),
@@ -409,7 +409,7 @@ fn main() {
 		let mut line: String = "".to_string();
 		let _ = x.read_line(&mut line);
 
-		if line.trim() == "quit" {break;}
+		if line.trim() == "" {break;}
 
 		for o in line.rsplit(" "){
 			let b = parse(o.trim());
