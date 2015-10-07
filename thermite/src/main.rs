@@ -2,13 +2,20 @@ use std::io;
 use std::str::FromStr;
 use std::collections::HashMap;
 
+enum VMState {
+	Definition,
+	Execution
+}
+
 pub struct VM {
+	state: VMState,
 	op_stack: Vec<Operator>,
 	data_stack: Vec<Operator>,
 	words: HashMap<String, Vec<Operator>>,
+	current_def_word: Option<String>,
 }
 
-impl VM {
+impl VM{
 	pub fn pop_data <'a> (&'a mut self) -> Operator {
 		return self.data_stack.pop().expect("data stack is empty!");
 	}
@@ -22,7 +29,48 @@ impl VM {
 	}
 
 	pub fn push_op <'a> (&'a mut self, op: Operator) {
-		self.op_stack.push(op);
+		match op {
+			Operator::Define => {
+				self.state = VMState::Definition;
+				return;
+			},
+			Operator::EndDefine => {
+				self.state = VMState::Execution;
+				self.current_def_word = None;
+				return;
+			},
+			_ => {}
+		};
+		let should_def = match self.state {
+			VMState::Definition => true,
+			VMState::Execution => false
+		};
+		if should_def {
+			let current_def_word = self.push_def_word(op);
+			self.current_def_word = Some(current_def_word);
+		} else {
+			self.op_stack.push(op);
+		}
+	}
+
+	fn push_def_word <'a> (&'a mut self, op: Operator) -> String{
+		let wrapped = self.current_def_word.as_ref();
+		let new_key = match wrapped {
+			Some(w) => {
+				self.words.get_mut(w).expect("error").push(op);
+				w.clone()
+			},
+			None => {
+				let key = match op {
+					Operator::Other(key) => key,
+					_ => panic!("key is broken")
+				};
+				self.words.insert(key.clone(), Vec::new());
+				key
+			}
+		};
+
+		return new_key;
 	}
 
 	pub fn eval <'a> (&'a mut self) {
@@ -50,8 +98,13 @@ impl VM {
 			Operator::Rot => self.rot(),
 			Operator::Value(i) => self.push_data(Operator::Value(i)),
 			Operator::Print => self.print(),
-			x => panic!("soon {}", x.stringify())
+			Operator::Other(s) => self.custom(s),
+			x => panic!("cannot eval: {}", x.stringify())
 		}
+	}
+
+	fn custom <'a> (&'a mut self, word: String) {
+
 	}
 
 	fn pop_two_ints <'a> (&'a mut self) -> (i32, i32){
@@ -222,15 +275,16 @@ pub enum Operator {
 
 	//custom
 	Define,
+	EndDefine,
 
 	//values and custom calls
 	Value(i32),
-	Other,
+	Other(String),
 }
 
 impl Operator {
-	fn stringify(&self) -> String {
-		match *self{
+	fn stringify(self) -> String {
+		match self{
 			Operator::Add => format!("+"),
 			Operator::Subtract => format!("-"),
 			Operator::Multiply => format!("*"),
@@ -254,7 +308,8 @@ impl Operator {
 			Operator::Value(i) => format!("{}", i),
 			Operator::Print => format!("."),
 			Operator::Define => format!(":"),
-			Operator::Other => format!("other"),
+			Operator::EndDefine => format!(";"),
+			Operator::Other(_) => format!("other"),
 		}
 	}
 }
@@ -292,13 +347,14 @@ fn parse(s: &str) -> Operator {
 
 		//custom definitions
 		":" => Operator::Define,
+		";" => Operator::EndDefine,
 
 		//value or custom operator
 		x => {
 			let y: Option<i32> = FromStr::from_str(x).ok();
 			match y{
 				Some(i) => Operator::Value(i),
-				None => Operator::Other,
+				None => Operator::Other(format!("other")),
 			}
 		},
 	}
@@ -306,9 +362,11 @@ fn parse(s: &str) -> Operator {
 
 fn main() {
 	let x = io::stdin();
-	let mut vm = VM {op_stack: vec![],
+	let mut vm = VM {state: VMState::Execution,
+					 op_stack: vec![],
 					 data_stack: vec![],
-					 words: HashMap::new()};
+					 words: HashMap::new(),
+				     current_def_word: None};
 
 	loop{
 		let mut line: String = "".to_string();
@@ -318,7 +376,7 @@ fn main() {
 
 		for o in line.rsplit(" "){
 			let b = parse(o.trim());
-			vm.push_op(b);
+			vm.push_op(b)
 		}
 
 		while vm.op_stack.len() > 0 {
