@@ -54,188 +54,94 @@ impl VM {
 		}
 	}
 
+	fn pop_two_ints <'a> (&'a mut self) -> (i32, i32){
+		let a = self.pop_one_int();
+		let b = self.pop_one_int();
+		(a, b)
+	}
+
+	fn pop_one_int <'a> (&'a mut self) -> i32 {
+		let a = self.pop_data();
+		match a {
+			Operator::Value(j) => j,
+			_ => panic!("can only add ints"),
+		}
+	}
+
 	// Math Functions
 	pub fn add <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i+j,
-				_ => panic!("can only add ints"),
-			},
-			_ => panic!("can only add ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x + y));
 	}
 
 	pub fn subtract <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i-j,
-				_ => panic!("can only subtract ints"),
-			},
-			_ => panic!("can only subtract ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x - y));
 	}
 
 	pub fn multiply <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i*j,
-				_ => panic!("can only multiply ints"),
-			},
-			_ => panic!("can only multiply ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x * y));
 	}
 
 	pub fn divide <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => j/i,
-				_ => panic!("can only divide ints"),
-			},
-			_ => panic!("can only divide ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(y / x));
 	}
 
 	pub fn modulus <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i % j,
-				_ => panic!("can only mod ints"),
-			},
-			_ => panic!("can only mod ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x % y));
 	}
 
 	pub fn and <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i & j,
-				_ => panic!("can only and ints"),
-			},
-			_ => panic!("can only and ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x & y));
 	}
 
 	pub fn or <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i | j,
-				_ => panic!("can only or ints"),
-			},
-			_ => panic!("can only or ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x | y));
 	}
 
 	pub fn xor <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i ^ j,
-				_ => panic!("can only xor ints"),
-			},
-			_ => panic!("can only xor ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x ^ y));
 	}
 
 	pub fn lshift <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i << j,
-				_ => panic!("can only lshift ints"),
-			},
-			_ => panic!("can only lshift ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x << y));
 	}
 
 	pub fn rshift <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => i >> j,
-				_ => panic!("can only rshift ints"),
-			},
-			_ => panic!("can only rshift ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(x >> y));
 	}
 
 	pub fn abs <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => if i < 0{-i} else {i},
-			_ => panic!("can only abs an int"),
-		};
-		self.push_data(Operator::Value(z));
+		let x = self.pop_one_int();
+		self.push_data(Operator::Value(if x < 0 {-x} else {x}));
 	}
 
 	pub fn max <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => if j > i {j} else{i},
-				_ => panic!("can only max ints"),
-			},
-			_ => panic!("can only max ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(if y > x {y} else {x}));
 	}
 
 	pub fn min <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let y = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => match y{
-				Operator::Value(j) => if j < i {j} else {i},
-				_ => panic!("can only min ints"),
-			},
-			_ => panic!("can only min ints"),
-		};
-		self.push_data(Operator::Value(z));
+		let (x, y) = self.pop_two_ints();
+		self.push_data(Operator::Value(if y < x {y} else {x}));
 	}
 
 	pub fn invert <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => !i,
-			_ => panic!("can only invert an int"),
-		};
-		self.push_data(Operator::Value(z));
+		let x = self.pop_one_int();
+		self.push_data(Operator::Value(!x));
 	}
 
 	pub fn negate <'a> (&'a mut self) {
-		let x = self.pop_data();
-		let z = match x{
-			Operator::Value(i) => -i,
-			_ => panic!("can only negate an int"),
-		};
-		self.push_data(Operator::Value(z));
+		let x = self.pop_one_int();
+		self.push_data(Operator::Value(-x));
 	}
 
 	//Stack Functions
@@ -283,7 +189,6 @@ impl VM {
 			_ => panic!("tried to print something other than a value"),
 		});
 	}
-	
 }
 
 #[derive(Clone)]
@@ -400,7 +305,7 @@ fn parse(s: &str) -> Operator {
 }
 
 fn main() {
-	let mut x = io::stdin();
+	let x = io::stdin();
 	let mut vm = VM {op_stack: vec![],
 					 data_stack: vec![],
 					 words: HashMap::new()};
