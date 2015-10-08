@@ -2,6 +2,7 @@ use std::io;
 use std::str::FromStr;
 use std::collections::HashMap;
 
+
 enum VMState {
 	Definition,
 	Execution
@@ -17,7 +18,8 @@ pub struct VM {
 
 impl VM{
 	pub fn pop_data <'a> (&'a mut self) -> Operator {
-		return self.data_stack.pop().expect("data stack is empty!");
+		let data = self.data_stack.pop().expect("data stack is empty!");
+		return data;
 	}
 
 	pub fn push_data <'a> (&'a mut self, op: Operator) {
@@ -25,7 +27,8 @@ impl VM{
 	}
 
 	pub fn pop_op <'a> (&'a mut self) -> Operator {
-		return self.op_stack.pop().expect("operand stack is empty!");
+		let op = self.op_stack.pop().expect("operand stack is empty!");
+		return op;
 	}
 
 	pub fn push_op <'a> (&'a mut self, op: Operator) {
@@ -49,7 +52,7 @@ impl VM{
 			let current_def_word = self.push_def_word(op);
 			self.current_def_word = Some(current_def_word);
 		} else {
-			self.op_stack.push(op);
+			self.op_stack.insert(0, op);
 		}
 	}
 
@@ -57,7 +60,7 @@ impl VM{
 		let wrapped = self.current_def_word.as_ref();
 		let new_key = match wrapped {
 			Some(w) => {
-				self.words.get_mut(w).expect("error").push(op);
+				self.words.get_mut(w).expect("error").insert(0, op);
 				w.clone()
 			},
 			None => {
@@ -96,7 +99,9 @@ impl VM{
 			Operator::Swap => self.swap(),
 			Operator::Over => self.over(),
 			Operator::Rot => self.rot(),
-			Operator::Value(i) => self.push_data(Operator::Value(i)),
+			Operator::Value(i) => {
+				self.push_data(Operator::Value(i));
+			},
 			Operator::Print => self.print(),
 			Operator::Other(s) => self.custom(s),
 			x => panic!("cannot eval: {}", x.stringify())
@@ -104,7 +109,19 @@ impl VM{
 	}
 
 	fn custom <'a> (&'a mut self, word: String) {
+		let words = self.words_from_word(word);
+		for op in words{
+			self.op_stack.push(op.clone());
+		}
+	}
 
+	fn words_from_word <'a> (&'a mut self, word: String) -> Vec<Operator>{
+		let mut ret : Vec<Operator> = Vec::new();
+		let ops = self.words.get(&word).expect("word not defined");
+		for some_op in ops{
+			ret.push(some_op.clone());
+		}
+		return ret;
 	}
 
 	fn pop_two_ints <'a> (&'a mut self) -> (i32, i32){
@@ -200,9 +217,8 @@ impl VM{
 	//Stack Functions
 	pub fn dup <'a> (&'a mut self) {
 		let x = self.pop_data();
-		let y = x.clone();
-		self.push_data(x);
-		self.push_data(y);
+		self.push_data(x.clone());
+		self.push_data(x.clone());
 	}
 
 	pub fn drop <'a> (&'a mut self) {
@@ -309,7 +325,7 @@ impl Operator {
 			Operator::Print => format!("."),
 			Operator::Define => format!(":"),
 			Operator::EndDefine => format!(";"),
-			Operator::Other(_) => format!("other"),
+			Operator::Other(x) => format!("other {}", x),
 		}
 	}
 }
@@ -354,7 +370,7 @@ fn parse(s: &str) -> Operator {
 			let y: Option<i32> = FromStr::from_str(x).ok();
 			match y{
 				Some(i) => Operator::Value(i),
-				None => Operator::Other(format!("other")),
+				None => Operator::Other(format!("{}", x)),
 			}
 		},
 	}
@@ -374,7 +390,7 @@ fn main() {
 
 		if line.trim() == "" {break;}
 
-		for o in line.rsplit(" "){
+		for o in line.split(" "){
 			let b = parse(o.trim());
 			vm.push_op(b)
 		}
